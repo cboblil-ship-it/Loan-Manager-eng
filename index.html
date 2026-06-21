@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f7;padding-bottom:30px}
+#app{max-width:500px;margin:0 auto}
+.hdr{background:#3C3489;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-size:18px;font-weight:700}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #eee}
+.tab{flex:1;padding:11px 4px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:#888;border-bottom:3px solid transparent}
+.tab.on{color:#3C3489;border-bottom-color:#3C3489}
+.page{display:none;padding:12px}
+.page.on{display:block}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card.no-click{cursor:default}
+.row2{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.lname{font-size:15px;font-weight:700;color:#111}
+.lsub{font-size:12px;color:#888;margin-top:2px}
+.bdg{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.ba{background:#EEEDFE;color:#3C3489}
+.bc{background:#e6f4e0;color:#2d6e10}
+.stats{display:flex;gap:8px;margin-bottom:8px}
+.st{flex:1;background:#f8f8f8;border-radius:8px;padding:7px;text-align:center;border:1px solid #eee}
+.sl{font-size:10px;color:#888;margin-bottom:2px}
+.sv{font-size:13px;font-weight:700;color:#111}
+.pbar{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin:6px 0}
+.pfill{height:100%;border-radius:3px;background:#3C3489}
+.hint{font-size:11px;color:#888}
+.scards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sc{background:#f8f8f8;border-radius:9px;padding:10px;border:1px solid #eee}
+.scl{font-size:11px;color:#888;margin-bottom:2px;font-weight:600}
+.scv{font-size:16px;font-weight:700;color:#111}
+.stit{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0}
+.mrow:last-child{border-bottom:none}
+.dv{height:1px;background:#f0f0f0;margin:12px 0}
+.es{text-align:center;padding:40px 20px;color:#aaa;font-size:14px}
+.ib{font-size:11px;background:#fff4e0;color:#7a4400;padding:2px 6px;border-radius:10px;font-weight:600}
+.pcrd{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pn{font-size:13px;font-weight:700}
+.tg{font-size:11px;padding:2px 7px;border-radius:20px;background:#e6f4e0;color:#2d6e10;font-weight:600}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.pdt{font-size:12px;color:#888}
+.pdt span{color:#111;font-weight:600}
+.pacts{display:flex;gap:6px}
+.eform{background:#f9f9f9;border:1px solid #ddd;border-radius:9px;padding:10px;margin-top:8px;display:none}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:#3C3489;cursor:pointer;margin-bottom:12px;font-weight:600;background:none;border:none;padding:0}
+.info-box{background:#f8f8f8;border-radius:9px;padding:10px;margin-bottom:12px;font-size:13px;color:#555}
+.prev-box{background:#eef4ff;border:1px solid #c0d0f0;border-radius:9px;padding:10px;margin-bottom:12px;display:none}
+.form-wrap{background:#fff;border-radius:12px;padding:16px;margin:12px;border:1px solid #e0e0e0}
+.form-title{font-size:16px;font-weight:700;margin-bottom:16px;color:#111}
+.fg{margin-bottom:13px}
+.fl{font-size:13px;color:#555;font-weight:600;margin-bottom:5px;display:block}
+.fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 12px;font-size:15px;color:#111;background:#fff}
+.fi:focus{outline:none;border-color:#3C3489}
+.fr{display:flex;gap:10px}
+.fr .fg{flex:1}
+.form-actions{display:flex;gap:8px;margin-top:16px}
+.form-actions .btn{flex:1;justify-content:center;font-size:14px;padding:11px}
+.btn{border:1px solid #ddd;background:#fff;color:#111;border-radius:9px;padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.btn-p{background:#3C3489;color:#fff;border-color:#3C3489}
+.btn-hdr{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:9px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-w{background:#fff7ec;color:#7a4400;border-color:#f0c080}
+.btn-d{color:#c00;border-color:#fcc;background:#fff8f8}
+.btn-s{padding:7px 11px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <h1>💰 Loan Manager</h1>
+    <button class="btn-hdr" onclick="showForm('add-loan')">+ Add</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="setTab(0,this)">Overview</button>
+    <button class="tab" onclick="setTab(1,this)">Lenders</button>
+    <button class="tab" onclick="setTab(2,this)">History</button>
+  </div>
+  <div id="page-0" class="page on"></div>
+  <div id="page-1" class="page"></div>
+  <div id="page-2" class="page"></div>
+  <div id="page-form" class="page"></div>
+  <div id="page-detail" class="page"></div>
+</div>
+
+<script>
+var MHE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+var D={loans:[],nid:1,pid:1};
+var lastTab=0;
+
+function save(){try{localStorage.setItem('lm10en',JSON.stringify(D));}catch(e){}}
+function load(){
+  try{var s=localStorage.getItem('lm10en');if(s){D=JSON.parse(s);return;}}catch(e){}
+  D={loans:[],nid:1,pid:1};
+  newLoan('John Smith',1200000,2,'2024-09-01','active',[
+    {id:1,date:'2024-10-01',paid:125000},
+    {id:2,date:'2024-11-01',paid:122000},
+    {id:3,date:'2024-12-01',paid:100000},
+    {id:4,date:'2025-01-01',paid:112000},
+    {id:5,date:'2025-02-01',paid:120000},
+    {id:6,date:'2025-03-01',paid:125000}
+  ]);
+  D.pid=7;
+}
+
+function newLoan(lender,amt,rate,start,status,payments){
+  D.loans.push({id:D.nid++,lender:lender,amt:+amt,rate:+rate,start:start,status:status||'active',notes:'',payments:payments||[]});
+  save();
+}
+
+// Balance = original - all paid
+function bal(l){return l.payments.reduce(function(s,p){return s-p.paid;},l.amt);}
+
+// Balance before a specific payment (by id): sum of payments with earlier date, or same date but lower id
+function balBefPayment(l,pay){
+  return l.payments.filter(function(p){
+    return p.date < pay.date || (p.date === pay.date && p.id < pay.id);
+  }).reduce(function(s,p){return s-p.paid;},l.amt);
+}
+
+// Interest for a payment = balance before that payment * rate
+function intrForPay(l,pay){return balBefPayment(l,pay)*(l.rate/100);}
+
+function totP(l){return l.payments.reduce(function(s,p){return s+p.paid;},0);}
+function pct(l){return Math.min(100,Math.round(totP(l)/l.amt*100));}
+function fc(n){return '₪'+Math.round(n).toLocaleString('he-IL');}
+function fmtDate(d){
+  var p=d.split('-');
+  return p[2]+'/'+p[1]+'/'+p[0];
+}
+function fmtMonth(d){
+  var p=d.split('-');
+  return MHE[+p[1]-1]+' '+p[0];
+}
+function todayD(){return new Date().toISOString().slice(0,10);}
+function g(id){return document.getElementById(id);}
+function v(id){return (g(id).value||'').trim();}
+function nv(id){return parseFloat(g(id).value);}
+
+function hidePagesExcept(pid){
+  ['page-0','page-1','page-2','page-form','page-detail'].forEach(function(id){
+    g(id).classList.toggle('on',id===pid);
+  });
+}
+
+function setTab(i,btn){
+  lastTab=i;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  hidePagesExcept('page-'+i);
+  if(i===0)renderOverview();
+  else if(i===1)renderLenders();
+  else renderHistory();
+}
+
+function cardHTML(loan){
+  var b=bal(loan),p=pct(loan);
+  return '<div class="card" onclick="showDetail('+loan.id+')">'
+    +'<div class="row2"><div><div class="lname">'+loan.lender+'</div>'
+    +'<div class="lsub">'+fc(loan.amt)+'&nbsp;<span class="ib">'+loan.rate+'% monthly</span></div></div>'
+    +'<span class="bdg '+(loan.status==='active'?'ba':'bc')+'">'+(loan.status==='active'?'Active':'Closed')+'</span></div>'
+    +'<div class="stats">'
+    +'<div class="st"><div class="sl">Balance</div><div class="sv" style="color:'+(loan.status==='active'?'#c00':'#111')+'">'+fc(b)+'</div></div>'
+    +'<div class="st"><div class="sl">Repaid</div><div class="sv">'+fc(totP(loan))+'</div></div>'
+    +'<div class="st"><div class="sl">Payments</div><div class="sv">'+loan.payments.length+'</div></div>'
+    +'</div>'
+    +'<div class="pbar"><div class="pfill" style="width:'+p+'%"></div></div>'
+    +'<div class="hint">'+p+'% repaid</div></div>';
+}
+
+function renderOverview(){
+  var act=D.loans.filter(function(l){return l.status==='active';});
+  var tA=act.reduce(function(s,l){return s+l.amt;},0);
+  var tB=act.reduce(function(s,l){return s+bal(l);},0);
+  var tP=act.reduce(function(s,l){return s+totP(l);},0);
+  var h='<div class="scards">'
+    +'<div class="sc"><div class="scl">Balance כוללת</div><div class="scv" style="color:#c00">'+fc(tB)+'</div></div>'
+    +'<div class="sc"><div class="scl">Total Repaid</div><div class="scv">'+fc(tP)+'</div></div>'
+    +'<div class="sc"><div class="scl">Activeות</div><div class="scv" style="color:#3C3489">'+act.length+'</div></div>'
+    +'<div class="sc"><div class="scl">% repaid</div><div class="scv">'+(tA?Math.round(tP/tA*100):0)+'%</div></div>'
+    +'</div>'
+    +'<div class="stit">הלוואות Activeות</div>'
+    +(act.length?act.map(cardHTML).join(''):'<div class="es">אין הלוואות Activeות</div>');
+  var all=[];
+  D.loans.forEach(function(l){l.payments.forEach(function(p){all.push({date:p.date,paid:p.paid,lender:l.lender,lid:l.id,pid:p.id});});});
+  all.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var rh=all.length?'':'<div class="es">אין Payments</div>';
+  all.slice(0,5).forEach(function(p){
+    var loan=D.loans.find(function(l){return l.id===p.lid;});
+    var pay=loan.payments.find(function(x){return x.id===p.pid;});
+    rh+='<div class="mrow"><div><div style="font-size:13px;font-weight:700">'+p.lender+'</div>'
+      +'<div style="font-size:11px;color:#888">'+fmtDate(p.date)+'</div></div>'
+      +'<div style="text-align:left"><div style="font-size:13px;font-weight:700">'+fc(p.paid)+'</div>'
+      +'<div style="font-size:11px;color:#c00">Interest: '+fc(intrForPay(loan,pay))+'</div></div></div>';
+  });
+  g('page-0').innerHTML=h+'<div class="stit">Payments אחרונים</div><div class="card no-click">'+rh+'</div>';
+}
+
+function renderLenders(){
+  g('page-1').innerHTML=D.loans.length?D.loans.map(cardHTML).join(''):'<div class="es">No lenders yet<br>לחץ + Add</div>';
+}
+
+function renderHistory(){
+  var all=[];
+  D.loans.forEach(function(l){l.payments.forEach(function(p){all.push({date:p.date,paid:p.paid,lender:l.lender,lid:l.id,pid:p.id});});});
+  all.sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(!all.length){g('page-2').innerHTML='<div class="es">No history yet</div>';return;}
+  // Group by month
+  var byM={};
+  all.forEach(function(p){var mk=p.date.slice(0,7);if(!byM[mk])byM[mk]=[];byM[mk].push(p);});
+  var h='';
+  Object.keys(byM).sort(function(a,b){return b.localeCompare(a);}).forEach(function(mk){
+    var ps=byM[mk],tot=ps.reduce(function(s,p){return s+p.paid;},0);
+    h+='<div class="stit">'+fmtMonth(mk+'-01')+' · Total '+fc(tot)+'</div><div class="card no-click" style="padding:10px 12px">';
+    ps.forEach(function(p){
+      var loan=D.loans.find(function(l){return l.id===p.lid;});
+      var pay=loan.payments.find(function(x){return x.id===p.pid;});
+      var bb=balBefPayment(loan,pay);
+      h+='<div class="mrow"><div><div style="font-size:13px;font-weight:700">'+p.lender+'</div>'
+        +'<div style="font-size:11px;color:#888">'+fmtDate(p.date)+' · Balance לפני: '+fc(bb)+'</div></div>'
+        +'<div style="text-align:left"><div style="font-size:13px;font-weight:700">'+fc(p.paid)+'</div>'
+        +'<div style="font-size:11px;color:#c00">Interest: '+fc(intrForPay(loan,pay))+'</div></div></div>';
+    });
+    h+='</div>';
+  });
+  g('page-2').innerHTML=h;
+}
+
+function showDetail(id){
+  var loan=D.loans.find(function(l){return l.id===id;});if(!loan)return;
+  var b=bal(loan),p=pct(loan);
+  var sorted=loan.payments.slice().sort(function(a,b){
+    return b.date.localeCompare(a.date)||b.id-a.id;
+  });
+  var ph=sorted.length?'':'<div class="es">אין Payments</div>';
+  sorted.forEach(function(pay){
+    var ir=intrForPay(loan,pay),bb=balBefPayment(loan,pay);
+    var eid='ef'+id+'_'+pay.id;
+    var aid='ea'+id+'_'+pay.id;
+    var did='ed'+id+'_'+pay.id;
+    ph+='<div class="pcrd">'
+      +'<div class="ph"><span class="pn">'+fmtDate(pay.date)+'</span><span class="tg">✓ Paid</span></div>'
+      +'<div class="pd">'
+      +'<div class="pdt">Paid: <span>'+fc(pay.paid)+'</span></div>'
+      +'<div class="pdt">Interest: <span style="color:#c00">'+fc(ir)+'</span></div>'
+      +'<div class="pdt">Balance לפני: <span>'+fc(bb)+'</span></div>'
+      +'<div class="pdt">Balance אחרי: <span>'+fc(bb-pay.paid)+'</span></div>'
+      +'</div>'
+      +'<div class="pacts">'
+      +'<button class="btn btn-w btn-s" onclick="toggleEF(\''+eid+'\')">✎ Edit</button>'
+      +'<button class="btn btn-d btn-s" onclick="delPay('+id+','+pay.id+')">✕ Delete</button>'
+      +'</div>'
+      +'<div class="eform" id="'+eid+'">'
+      +'<div class="fg"><label class="fl">Amount</label><input class="fi" id="'+aid+'" type="number" value="'+pay.paid+'"></div>'
+      +'<div class="fg"><label class="fl">Date</label><input class="fi" id="'+did+'" type="date" value="'+pay.date+'"></div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="btn btn-p btn-s" onclick="saveEditPay('+id+','+pay.id+',\''+aid+'\',\''+did+'\')">✓ Save</button>'
+      +'<button class="btn btn-s" onclick="toggleEF(\''+eid+'\')">Cancel</button>'
+      +'</div></div></div>';
+  });
+
+  g('page-detail').innerHTML=
+    '<div style="padding:12px">'
+    +'<button class="back-link" onclick="setTab('+lastTab+',document.querySelectorAll(\'.tab\')['+lastTab+'])">← Back</button>'
+    +'<div class="row2" style="margin-bottom:12px">'
+    +'<div><div class="lname" style="font-size:17px">'+loan.lender+'</div><div class="lsub">Monthly interest: '+loan.rate+'%</div></div>'
+    +'<span class="bdg '+(loan.status==='active'?'ba':'bc')+'">'+(loan.status==='active'?'Active':'Closed')+'</span>'
+    +'</div>'
+    +'<div class="scards">'
+    +'<div class="sc"><div class="scl">Original</div><div class="scv">'+fc(loan.amt)+'</div></div>'
+    +'<div class="sc"><div class="scl">Balance</div><div class="scv" style="color:#c00">'+fc(b)+'</div></div>'
+    +'<div class="sc"><div class="scl">Repaid</div><div class="scv">'+fc(totP(loan))+'</div></div>'
+    +'<div class="sc"><div class="scl">%</div><div class="scv" style="color:#3C3489">'+p+'%</div></div>'
+    +'</div>'
+    +'<div class="pbar" style="height:8px"><div class="pfill" style="width:'+p+'%"></div></div>'
+    +'<div class="dv"></div>'
+    +'<div class="srow"><div class="stit" style="margin:0">Payments</div>'
+    +'<button class="btn btn-p btn-s" onclick="showForm(\'add-pay\','+id+')">+ Add תשלום</button>'
+    +'</div>'
+    +ph
+    +'<div class="dv"></div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn btn-s" style="flex:1" onclick="showForm(\'edit-loan\','+id+')">✎ Edit הלוואה</button>'
+    +'<button class="btn btn-d btn-s" style="flex:1" onclick="delLoan('+id+')">✕ Delete</button>'
+    +'</div></div>';
+
+  hidePagesExcept('page-detail');
+}
+
+function toggleEF(eid){var f=g(eid);if(f)f.style.display=f.style.display==='block'?'none':'block';}
+
+function saveEditPay(lid,pid,aid,did){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var amt=parseFloat(g(aid).value);
+  var date=g(did).value;
+  if(!amt||!date){alert('נא למלא Amount וDate');return;}
+  var pay=loan.payments.find(function(p){return p.id===pid;});
+  if(pay){pay.paid=amt;pay.date=date;}
+  save();showDetail(lid);
+}
+
+function delPay(lid,pid){
+  if(!confirm('Delete this payment?'))return;
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  loan.payments=loan.payments.filter(function(p){return p.id!==pid;});
+  save();showDetail(lid);
+}
+
+function delLoan(id){
+  if(!confirm('Delete this loan and all its payments?'))return;
+  D.loans=D.loans.filter(function(l){return l.id!==id;});
+  save();setTab(lastTab,document.querySelectorAll('.tab')[lastTab]);
+}
+
+function showForm(type,id){
+  var loan=id?D.loans.find(function(l){return l.id===id;}):null;
+  var h='';
+
+  if(type==='add-loan'){
+    h='<div class="form-wrap">'
+      +'<div class="form-title">➕ Add New Loan</div>'
+      +'<div class="fg"><label class="fl">Lender name</label><input class="fi" id="f-lender" type="text" placeholder="e.g. John Smith"></div>'
+      +'<div class="fr">'
+      +'<div class="fg"><label class="fl">Amount (₪)</label><input class="fi" id="f-amt" type="number" placeholder="1000000" inputmode="numeric"></div>'
+      +'<div class="fg"><label class="fl">Monthly interest %</label><input class="fi" id="f-rate" type="number" step="0.1" placeholder="2" inputmode="decimal"></div>'
+      +'</div>'
+      +'<div class="fg"><label class="fl">Date התחלה</label><input class="fi" id="f-start" type="date" value="'+todayD()+'"></div>'
+      +'<div class="fg"><label class="fl">Notes</label><input class="fi" id="f-notes" type="text" placeholder="Optional..."></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="setTab(lastTab,document.querySelectorAll(\'.tab\')[lastTab])">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitAddLoan()">✓ Add Loan</button>'
+      +'</div></div>';
+  }
+  else if(type==='add-pay'){
+    h='<div class="form-wrap">'
+      +'<button class="back-link" onclick="showDetail('+id+')">← Back</button>'
+      +'<div class="form-title">Add Payment — '+loan.lender+'</div>'
+      +'<div class="info-box">Balance נוכחית: <strong>'+fc(bal(loan))+'</strong></div>'
+      +'<div class="fg"><label class="fl">Date תשלום</label><input class="fi" id="p-date" type="date" value="'+todayD()+'"></div>'
+      +'<div class="fg"><label class="fl">Amount שולם (₪)</label><input class="fi" id="p-amt" type="number" placeholder="100000" inputmode="numeric" oninput="previewPay('+id+')" onchange="previewPay('+id+')"></div>'
+      +'<div class="prev-box" id="p-prev"><div class="pd">'
+      +'<div class="pdt">Interest on this payment: <span id="p-prev-i" style="color:#c00;font-weight:700"></span></div>'
+      +'<div class="pdt">Balance אחרי: <span id="p-prev-b" style="font-weight:700"></span></div>'
+      +'</div></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="showDetail('+id+')">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitAddPay('+id+')">✓ Save תשלום</button>'
+      +'</div></div>';
+  }
+  else if(type==='edit-loan'){
+    h='<div class="form-wrap">'
+      +'<button class="back-link" onclick="showDetail('+id+')">← Back</button>'
+      +'<div class="form-title">✎ Edit הלוואה</div>'
+      +'<div class="fg"><label class="fl">Lender name</label><input class="fi" id="e-lender" type="text" value="'+loan.lender+'"></div>'
+      +'<div class="fr">'
+      +'<div class="fg"><label class="fl">Amount (₪)</label><input class="fi" id="e-amt" type="number" value="'+loan.amt+'" inputmode="numeric"></div>'
+      +'<div class="fg"><label class="fl">Interest %</label><input class="fi" id="e-rate" type="number" step="0.1" value="'+loan.rate+'" inputmode="decimal"></div>'
+      +'</div>'
+      +'<div class="fg"><label class="fl">Status</label><select class="fi" id="e-status">'
+      +'<option value="active"'+(loan.status==='active'?' selected':'')+'>Active</option>'
+      +'<option value="closed"'+(loan.status==='closed'?' selected':'')+'>Closed</option>'
+      +'</select></div>'
+      +'<div class="fg"><label class="fl">Notes</label><input class="fi" id="e-notes" type="text" value="'+(loan.notes||'')+'"></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="showDetail('+id+')">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitEditLoan('+id+')">✓ Save</button>'
+      +'</div></div>';
+  }
+
+  g('page-form').innerHTML=h;
+  hidePagesExcept('page-form');
+}
+
+function previewPay(lid){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var a=parseFloat(g('p-amt').value),date=g('p-date').value,box=g('p-prev');
+  if(!a||!date){box.style.display='none';return;}
+  // Create a temporary payment to calculate interest
+  var tmpPay={id:999999,date:date,paid:a};
+  var bb=balBefPayment(loan,tmpPay);
+  var ir=bb*(loan.rate/100);
+  g('p-prev-i').textContent=fc(ir);
+  g('p-prev-b').textContent=fc(bal(loan)-a);
+  box.style.display='block';
+}
+
+function submitAddLoan(){
+  var lender=v('f-lender');
+  var amt=nv('f-amt');
+  var rate=nv('f-rate');
+  var start=g('f-start').value;
+  if(!lender||!amt||!rate||!start){alert('נא למלא: שם, Amount, ריבית וDate');return;}
+  newLoan(lender,amt,rate,start,'active',[]);
+  setTab(1,document.querySelectorAll('.tab')[1]);
+}
+
+function submitAddPay(lid){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var a=nv('p-amt');
+  var date=g('p-date').value;
+  if(!a||!date){alert('נא למלא Date וAmount');return;}
+  loan.payments.push({id:D.pid++,date:date,paid:a});
+  save();showDetail(lid);
+}
+
+function submitEditLoan(id){
+  var l=D.loans.find(function(x){return x.id===id;});
+  var lender=v('e-lender');
+  var amt=nv('e-amt');
+  var rate=nv('e-rate');
+  if(!lender||!amt||!rate){alert('Please fill in all fields');return;}
+  l.lender=lender;l.amt=amt;l.rate=rate;
+  l.status=g('e-status').value;l.notes=v('e-notes');
+  save();showDetail(id);
+}
+
+load();
+renderOverview();
+</script>
+</body>
+</html>
