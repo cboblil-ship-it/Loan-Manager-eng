@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f5f7;padding-bottom:30px}
+#app{max-width:520px;margin:0 auto}
+.hdr{background:#3C3489;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-size:18px;font-weight:700}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #eee}
+.tab{flex:1;padding:11px 4px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:#888;border-bottom:3px solid transparent}
+.tab.on{color:#3C3489;border-bottom-color:#3C3489}
+.page{display:none;padding:12px}
+.page.on{display:block}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card.nc{cursor:default}
+.row2{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.lname{font-size:15px;font-weight:700;color:#111}
+.lsub{font-size:12px;color:#888;margin-top:2px}
+.bdg{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+.ba{background:#EEEDFE;color:#3C3489}
+.bc{background:#e6f4e0;color:#2d6e10}
+.stats{display:flex;gap:8px;margin-bottom:8px}
+.st{flex:1;background:#f8f8f8;border-radius:8px;padding:7px;text-align:center;border:1px solid #eee}
+.sl{font-size:10px;color:#888;margin-bottom:2px}
+.sv{font-size:13px;font-weight:700;color:#111}
+.pbar{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin:6px 0}
+.pfill{height:100%;border-radius:3px;background:#3C3489}
+.hint{font-size:11px;color:#888}
+.scards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sc{background:#f8f8f8;border-radius:9px;padding:10px;border:1px solid #eee}
+.scl{font-size:11px;color:#888;margin-bottom:2px;font-weight:600}
+.scv{font-size:15px;font-weight:700;color:#111}
+.stit{font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0}
+.mrow:last-child{border-bottom:none}
+.dv{height:1px;background:#f0f0f0;margin:12px 0}
+.es{text-align:center;padding:40px 20px;color:#aaa;font-size:14px}
+.ib{font-size:11px;background:#fff4e0;color:#7a4400;padding:2px 6px;border-radius:10px;font-weight:600}
+
+/* MONTHLY SCHEDULE TABLE */
+.schedule-wrap{overflow-x:auto;margin-bottom:10px}
+.schedule-table{width:100%;border-collapse:collapse;font-size:12px}
+.schedule-table th{background:#3C3489;color:#fff;padding:7px 8px;text-align:left;font-weight:600;white-space:nowrap}
+.schedule-table td{padding:7px 8px;border-bottom:1px solid #f0f0f0;white-space:nowrap;vertical-align:top}
+.schedule-table tr:last-child td{border-bottom:none}
+.schedule-table tr.has-pay{background:#f0f9f0}
+.schedule-table tr.future{background:#fffbf0;color:#888}
+.schedule-table tr.current-month{background:#eef4ff}
+.pay-tag{display:inline-block;font-size:10px;background:#e6f4e0;color:#2d6e10;border-radius:10px;padding:1px 5px;margin-top:2px}
+.accrued-tag{display:inline-block;font-size:10px;background:#fff0e0;color:#c00;border-radius:10px;padding:1px 5px;margin-top:2px}
+.pay-pill{display:inline-block;background:#e6f4e0;color:#2d6e10;border-radius:10px;padding:2px 7px;font-size:11px;margin:1px 0}
+.no-pay-pill{display:inline-block;background:#f5f5f5;color:#aaa;border-radius:10px;padding:2px 7px;font-size:11px}
+
+/* PAYMENT CARD */
+.pcrd{background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pn{font-size:13px;font-weight:700}
+.tg{font-size:11px;padding:2px 7px;border-radius:20px;background:#e6f4e0;color:#2d6e10;font-weight:600}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.pdt{font-size:12px;color:#888}
+.pdt span{color:#111;font-weight:600}
+.pacts{display:flex;gap:6px}
+.eform{background:#f9f9f9;border:1px solid #ddd;border-radius:9px;padding:10px;margin-top:8px;display:none}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:#3C3489;cursor:pointer;margin-bottom:12px;font-weight:600;background:none;border:none;padding:0}
+.info-box{background:#f8f8f8;border-radius:9px;padding:10px;margin-bottom:12px;font-size:13px;color:#555}
+.prev-box{background:#eef4ff;border:1px solid #c0d0f0;border-radius:9px;padding:10px;margin-bottom:12px;display:none}
+
+/* SUMMARY BAR */
+.sum-bar{background:#3C3489;color:#fff;border-radius:10px;padding:12px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.sum-bar .sl{font-size:10px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.sum-bar .sv{font-size:14px;font-weight:700;color:#fff}
+
+/* FORMS */
+.form-wrap{background:#fff;border-radius:12px;padding:16px;margin:12px;border:1px solid #e0e0e0}
+.form-title{font-size:16px;font-weight:700;margin-bottom:16px;color:#111}
+.fg{margin-bottom:13px}
+.fl{font-size:13px;color:#555;font-weight:600;margin-bottom:5px;display:block}
+.fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 12px;font-size:15px;color:#111;background:#fff}
+.fi:focus{outline:none;border-color:#3C3489}
+.fr{display:flex;gap:10px}
+.fr .fg{flex:1}
+.form-actions{display:flex;gap:8px;margin-top:16px}
+.form-actions .btn{flex:1;justify-content:center;font-size:14px;padding:11px}
+
+/* BUTTONS */
+.btn{border:1px solid #ddd;background:#fff;color:#111;border-radius:9px;padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.btn-p{background:#3C3489;color:#fff;border-color:#3C3489}
+.btn-hdr{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.5);border-radius:9px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-w{background:#fff7ec;color:#7a4400;border-color:#f0c080}
+.btn-d{color:#c00;border-color:#fcc;background:#fff8f8}
+.btn-s{padding:7px 11px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <h1>💰 Loan Manager</h1>
+    <button class="btn-hdr" onclick="showForm('add-loan')">+ Add</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="setTab(0,this)">Overview</button>
+    <button class="tab" onclick="setTab(1,this)">Lenders</button>
+    <button class="tab" onclick="setTab(2,this)">Schedule</button>
+  </div>
+  <div id="page-0" class="page on"></div>
+  <div id="page-1" class="page"></div>
+  <div id="page-2" class="page"></div>
+  <div id="page-form" class="page"></div>
+  <div id="page-detail" class="page"></div>
+</div>
+
+<script>
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var D={loans:[],nid:1,pid:1};
+var lastTab=0;
+
+function save(){try{localStorage.setItem('lm_en2',JSON.stringify(D));}catch(e){}}
+function load(){
+  try{var s=localStorage.getItem('lm_en2');if(s){D=JSON.parse(s);return;}}catch(e){}
+  D={loans:[],nid:1,pid:1};
+  newLoan('John Smith',1200000,2,'2024-09-01','active',[
+    {id:1,date:'2024-10-01',paid:125000},
+    {id:2,date:'2024-11-01',paid:122000},
+    {id:3,date:'2024-12-01',paid:100000},
+    {id:4,date:'2025-01-01',paid:112000},
+    {id:5,date:'2025-02-01',paid:120000},
+    {id:6,date:'2025-03-01',paid:125000}
+  ]);
+  D.pid=7;
+}
+
+function newLoan(lender,amt,rate,start,status,payments){
+  D.loans.push({id:D.nid++,lender:lender,amt:+amt,rate:+rate,start:start,status:status||'active',notes:'',payments:payments||[]});
+  save();
+}
+
+// ── Core calculations ──────────────────────────────────────────
+
+// Total paid so far
+function totPaid(l){return l.payments.reduce(function(s,p){return s+p.paid;},0);}
+
+// Current balance (principal remaining)
+function currentBal(l){return l.amt - totPaid(l);}
+
+// Balance before a specific payment (ordered by date then id)
+function balBeforePayment(l,pay){
+  return l.payments
+    .filter(function(p){return p.date<pay.date||(p.date===pay.date&&p.id<pay.id);})
+    .reduce(function(s,p){return s-p.paid;},l.amt);
+}
+
+// Interest for a payment = fixed monthly interest on original principal
+function intrForPayment(l,pay){return l.amt*(l.rate/100);}
+
+// Build monthly schedule from loan start to today (+ 1 future month)
+function buildSchedule(loan){
+  var rows=[];
+  var startMk=loan.start.slice(0,7);
+  var now=new Date();
+  var curMk=now.getFullYear()+'-'+(now.getMonth()<9?'0':'')+(now.getMonth()+1);
+
+  var mk=startMk;
+  var endMk=addMonths(curMk,1);
+  // Fixed monthly interest = always on original principal
+  var fixedMonthlyInterest=loan.amt*(loan.rate/100);
+  var runningBal=loan.amt;
+
+  while(mk<=endMk){
+    var mPayments=loan.payments.filter(function(p){return p.date.slice(0,7)===mk;})
+      .sort(function(a,b){return a.date.localeCompare(b.date)||a.id-b.id;});
+
+    var openBal=runningBal;
+    var totalPaidThisMonth=mPayments.reduce(function(s,p){return s+p.paid;},0);
+    // Interest is fixed on original principal every month
+    var closeBal=openBal+fixedMonthlyInterest-totalPaidThisMonth;
+
+    rows.push({
+      mk:mk,
+      openBal:openBal,
+      interest:fixedMonthlyInterest,
+      payments:mPayments,
+      totalPaid:totalPaidThisMonth,
+      closeBal:closeBal,
+      isFuture:mk>curMk,
+      isCurrent:mk===curMk
+    });
+
+    runningBal=closeBal;
+    mk=addMonths(mk,1);
+  }
+  return rows;
+}
+
+function addMonths(mk,n){
+  var p=mk.split('-');
+  var y=+p[0],m=+p[1];
+  m+=n;
+  while(m>12){m-=12;y++;}
+  while(m<1){m+=12;y--;}
+  return y+'-'+(m<10?'0':'')+m;
+}
+
+function mkLabel(mk){var p=mk.split('-');return MONTHS[+p[1]-1]+' '+p[0];}
+function fmtDate(d){var p=d.split('-');return p[1]+'/'+p[2]+'/'+p[0];}
+function todayD(){return new Date().toISOString().slice(0,10);}
+function fc(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function pct(l){return Math.min(100,Math.round(totPaid(l)/l.amt*100));}
+function g(id){return document.getElementById(id);}
+function v(id){return (g(id).value||'').trim();}
+function nv(id){return parseFloat(g(id).value);}
+
+function hidePagesExcept(pid){
+  ['page-0','page-1','page-2','page-form','page-detail'].forEach(function(id){
+    g(id).classList.toggle('on',id===pid);
+  });
+}
+
+function setTab(i,btn){
+  lastTab=i;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  hidePagesExcept('page-'+i);
+  if(i===0)renderOverview();
+  else if(i===1)renderLenders();
+  else renderAllSchedules();
+}
+
+// ── Card HTML ──────────────────────────────────────────────────
+function cardHTML(loan){
+  var b=currentBal(loan),p=pct(loan);
+  var schedule=buildSchedule(loan);
+  var curRow=schedule.filter(function(r){return !r.isFuture;}).slice(-1)[0];
+  var accruedInterest=schedule.reduce(function(s,r){return r.isFuture?s:s+r.interest;},0);
+  return '<div class="card" onclick="showDetail('+loan.id+')">'
+    +'<div class="row2"><div><div class="lname">'+loan.lender+'</div>'
+    +'<div class="lsub">'+fc(loan.amt)+' original &nbsp;<span class="ib">'+loan.rate+'%/mo</span></div></div>'
+    +'<span class="bdg '+(loan.status==='active'?'ba':'bc')+'">'+(loan.status==='active'?'Active':'Closed')+'</span></div>'
+    +'<div class="stats">'
+    +'<div class="st"><div class="sl">Balance Due</div><div class="sv" style="color:'+(loan.status==='active'?'#c00':'#111')+'">'+fc(b)+'</div></div>'
+    +'<div class="st"><div class="sl">Total Paid</div><div class="sv">'+fc(totPaid(loan))+'</div></div>'
+    +'<div class="st"><div class="sl">Interest Accrued</div><div class="sv" style="color:#c60">'+fc(accruedInterest)+'</div></div>'
+    +'</div>'
+    +(curRow?'<div style="font-size:11px;color:#888;margin-bottom:6px">This month interest: <strong style="color:#c00">'+fc(curRow.interest)+'</strong> &nbsp;·&nbsp; Month close balance: <strong>'+fc(curRow.closeBal)+'</strong></div>':'')
+    +'<div class="pbar"><div class="pfill" style="width:'+p+'%"></div></div>'
+    +'<div class="hint">'+p+'% repaid · '+loan.payments.length+' payments</div></div>';
+}
+
+// ── Overview ───────────────────────────────────────────────────
+function renderOverview(){
+  var act=D.loans.filter(function(l){return l.status==='active';});
+  var tA=act.reduce(function(s,l){return s+l.amt;},0);
+  var tB=act.reduce(function(s,l){return s+currentBal(l);},0);
+  var tP=act.reduce(function(s,l){return s+totPaid(l);},0);
+  var tI=act.reduce(function(s,l){
+    return s+buildSchedule(l).filter(function(r){return !r.isFuture;}).reduce(function(ss,r){return ss+r.interest;},0);
+  },0);
+  var h='<div class="scards">'
+    +'<div class="sc"><div class="scl">Total Balance Due</div><div class="scv" style="color:#c00">'+fc(tB)+'</div></div>'
+    +'<div class="sc"><div class="scl">Total Paid</div><div class="scv">'+fc(tP)+'</div></div>'
+    +'<div class="sc"><div class="scl">Total Interest Accrued</div><div class="scv" style="color:#c60">'+fc(tI)+'</div></div>'
+    +'<div class="sc"><div class="scl">Active Loans</div><div class="scv" style="color:#3C3489">'+act.length+'</div></div>'
+    +'</div><div class="stit">Active Loans</div>'
+    +(act.length?act.map(cardHTML).join(''):'<div class="es">No active loans</div>');
+  // recent payments
+  var all=[];
+  D.loans.forEach(function(l){l.payments.forEach(function(p){all.push({date:p.date,paid:p.paid,lender:l.lender,lid:l.id,pid:p.id});});});
+  all.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var rh=all.length?'':'<div class="es">No payments yet</div>';
+  all.slice(0,5).forEach(function(p){
+    var loan=D.loans.find(function(l){return l.id===p.lid;});
+    var pay=loan.payments.find(function(x){return x.id===p.pid;});
+    rh+='<div class="mrow"><div><div style="font-size:13px;font-weight:700">'+p.lender+'</div>'
+      +'<div style="font-size:11px;color:#888">'+fmtDate(p.date)+'</div></div>'
+      +'<div style="text-align:right"><div style="font-size:13px;font-weight:700">'+fc(p.paid)+'</div>'
+      +'<div style="font-size:11px;color:#c00">Interest: '+fc(intrForPayment(loan,pay))+'</div></div></div>';
+  });
+  g('page-0').innerHTML=h+'<div class="stit">Recent Payments</div><div class="card nc">'+rh+'</div>';
+}
+
+// ── Lenders ────────────────────────────────────────────────────
+function renderLenders(){
+  g('page-1').innerHTML=D.loans.length?D.loans.map(cardHTML).join(''):'<div class="es">No lenders yet<br>Click + Add</div>';
+}
+
+// ── All Schedules ──────────────────────────────────────────────
+function renderAllSchedules(){
+  if(!D.loans.length){g('page-2').innerHTML='<div class="es">No loans yet</div>';return;}
+  var h='';
+  D.loans.forEach(function(loan){
+    h+='<div style="font-size:14px;font-weight:700;color:#3C3489;margin:14px 0 6px">'+loan.lender+' &mdash; <span style="font-size:12px;color:#888">'+loan.rate+'%/month</span></div>';
+    h+=scheduleTableHTML(loan);
+  });
+  g('page-2').innerHTML=h;
+}
+
+function scheduleTableHTML(loan){
+  var rows=buildSchedule(loan);
+  var h='<div class="schedule-wrap"><table class="schedule-table">'
+    +'<thead><tr>'
+    +'<th>Month</th><th>Open Balance</th><th>Interest (fixed)</th><th>Payments</th><th>Close Balance</th>'
+    +'</tr></thead><tbody>';
+  rows.forEach(function(r){
+    var cls=r.isFuture?'future':(r.isCurrent?'current-month':(r.payments.length?'has-pay':''));
+    var payCell='<span class="no-pay-pill">—</span>';
+    if(r.payments.length){
+      payCell=r.payments.map(function(p){
+        return '<span class="pay-pill">'+fmtDate(p.date)+': '+fc(p.paid)+'</span>';
+      }).join('<br>');
+    }
+    var balStyle=r.closeBal>0?'color:#c00':'color:#2d6e10';
+    h+='<tr class="'+cls+'">'
+      +'<td><strong>'+mkLabel(r.mk)+'</strong>'+(r.isCurrent?' <span style="font-size:10px;background:#3C3489;color:#fff;padding:1px 5px;border-radius:8px">Now</span>':'')+(r.isFuture?' <span style="font-size:10px;color:#aaa">forecast</span>':'')+'</td>'
+      +'<td>'+fc(r.openBal)+'</td>'
+      +'<td><strong style="color:#c60">'+fc(r.interest)+'</strong></td>'
+      +'<td>'+payCell+'</td>'
+      +'<td><strong style="'+balStyle+'">'+fc(r.closeBal)+'</strong></td>'
+      +'</tr>';
+  });
+  h+='</tbody></table></div>';
+  return h;
+}
+
+// ── Loan Detail ────────────────────────────────────────────────
+function showDetail(id){
+  var loan=D.loans.find(function(l){return l.id===id;});if(!loan)return;
+  var b=currentBal(loan),p=pct(loan);
+  var schedule=buildSchedule(loan);
+  var totalInterest=schedule.filter(function(r){return !r.isFuture;}).reduce(function(s,r){return s+r.interest;},0);
+
+  // Payments list
+  var sorted=loan.payments.slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
+  var ph=sorted.length?'':'<div class="es">No payments yet</div>';
+  sorted.forEach(function(pay){
+    var ir=intrForPayment(loan,pay),bb=balBeforePayment(loan,pay);
+    var eid='ef'+id+'_'+pay.id;
+    var aid='ea'+id+'_'+pay.id;
+    var did='ed'+id+'_'+pay.id;
+    ph+='<div class="pcrd">'
+      +'<div class="ph"><span class="pn">'+fmtDate(pay.date)+'</span><span class="tg">&#10003; Paid</span></div>'
+      +'<div class="pd">'
+      +'<div class="pdt">Amount paid: <span>'+fc(pay.paid)+'</span></div>'
+      +'<div class="pdt">Monthly Interest (fixed): <span style="color:#c00">'+fc(ir)+'</span></div>'
+      +'<div class="pdt">Balance before: <span>'+fc(bb)+'</span></div>'
+      +'<div class="pdt">Balance after: <span>'+fc(bb-pay.paid)+'</span></div>'
+      +'</div>'
+      +'<div class="pacts">'
+      +'<button class="btn btn-w btn-s" onclick="toggleEF(\''+eid+'\')">&#9998; Edit</button>'
+      +'<button class="btn btn-d btn-s" onclick="delPay('+id+','+pay.id+')">&#10005; Delete</button>'
+      +'</div>'
+      +'<div class="eform" id="'+eid+'">'
+      +'<div class="fg"><label class="fl">Amount</label><input class="fi" id="'+aid+'" type="number" value="'+pay.paid+'"></div>'
+      +'<div class="fg"><label class="fl">Date</label><input class="fi" id="'+did+'" type="date" value="'+pay.date+'"></div>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="btn btn-p btn-s" onclick="saveEditPay('+id+','+pay.id+',\''+aid+'\',\''+did+'\')">&#10003; Save</button>'
+      +'<button class="btn btn-s" onclick="toggleEF(\''+eid+'\')">Cancel</button>'
+      +'</div></div></div>';
+  });
+
+  g('page-detail').innerHTML=
+    '<div style="padding:12px">'
+    +'<button class="back-link" onclick="setTab('+lastTab+',document.querySelectorAll(\'.tab\')['+lastTab+'])">&#8592; Back</button>'
+    +'<div class="row2" style="margin-bottom:12px">'
+    +'<div><div class="lname" style="font-size:17px">'+loan.lender+'</div>'
+    +'<div class="lsub">'+loan.rate+'% monthly interest &nbsp;·&nbsp; Started '+fmtDate(loan.start)+'</div></div>'
+    +'<span class="bdg '+(loan.status==='active'?'ba':'bc')+'">'+(loan.status==='active'?'Active':'Closed')+'</span>'
+    +'</div>'
+    // summary bar
+    +'<div class="sum-bar">'
+    +'<div><div class="sl">Original</div><div class="sv">'+fc(loan.amt)+'</div></div>'
+    +'<div><div class="sl">Balance Due</div><div class="sv">'+fc(b)+'</div></div>'
+    +'<div><div class="sl">Total Interest</div><div class="sv">'+fc(totalInterest)+'</div></div>'
+    +'</div>'
+    +'<div class="pbar" style="height:8px"><div class="pfill" style="width:'+p+'%"></div></div>'
+    +'<div class="hint" style="margin-bottom:10px">'+p+'% of principal repaid</div>'
+    // monthly schedule
+    +'<div class="dv"></div>'
+    +'<div class="stit">Monthly Schedule</div>'
+    +scheduleTableHTML(loan)
+    // payments list
+    +'<div class="dv"></div>'
+    +'<div class="srow"><div class="stit" style="margin:0">Payment History</div>'
+    +'<button class="btn btn-p btn-s" onclick="showForm(\'add-pay\','+id+')">+ Add Payment</button>'
+    +'</div>'
+    +ph
+    +'<div class="dv"></div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn btn-s" style="flex:1" onclick="showForm(\'edit-loan\','+id+')">&#9998; Edit Loan</button>'
+    +'<button class="btn btn-d btn-s" style="flex:1" onclick="delLoan('+id+')">&#10005; Delete</button>'
+    +'</div></div>';
+
+  hidePagesExcept('page-detail');
+}
+
+function toggleEF(eid){var f=g(eid);if(f)f.style.display=f.style.display==='block'?'none':'block';}
+
+function saveEditPay(lid,pid,aid,did){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var amt=parseFloat(g(aid).value),date=g(did).value;
+  if(!amt||!date){alert('Please fill in amount and date');return;}
+  var pay=loan.payments.find(function(p){return p.id===pid;});
+  if(pay){pay.paid=amt;pay.date=date;}
+  save();showDetail(lid);
+}
+
+function delPay(lid,pid){
+  if(!confirm('Delete this payment?'))return;
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  loan.payments=loan.payments.filter(function(p){return p.id!==pid;});
+  save();showDetail(lid);
+}
+
+function delLoan(id){
+  if(!confirm('Delete this loan and all its payments?'))return;
+  D.loans=D.loans.filter(function(l){return l.id!==id;});
+  save();setTab(lastTab,document.querySelectorAll('.tab')[lastTab]);
+}
+
+// ── Forms ──────────────────────────────────────────────────────
+function showForm(type,id){
+  var loan=id?D.loans.find(function(l){return l.id===id;}):null;
+  var h='';
+
+  if(type==='add-loan'){
+    h='<div class="form-wrap">'
+      +'<div class="form-title">&#10133; Add New Loan</div>'
+      +'<div class="fg"><label class="fl">Lender Name</label><input class="fi" id="f-lender" type="text" placeholder="e.g. John Smith"></div>'
+      +'<div class="fr">'
+      +'<div class="fg"><label class="fl">Principal Amount ($)</label><input class="fi" id="f-amt" type="number" placeholder="1000000" inputmode="numeric"></div>'
+      +'<div class="fg"><label class="fl">Monthly Interest %</label><input class="fi" id="f-rate" type="number" step="0.1" placeholder="2" inputmode="decimal"></div>'
+      +'</div>'
+      +'<div class="fg"><label class="fl">Start Date</label><input class="fi" id="f-start" type="date" value="'+todayD()+'"></div>'
+      +'<div class="fg"><label class="fl">Notes</label><input class="fi" id="f-notes" type="text" placeholder="Optional..."></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="setTab(lastTab,document.querySelectorAll(\'.tab\')[lastTab])">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitAddLoan()">&#10003; Add Loan</button>'
+      +'</div></div>';
+  }
+  else if(type==='add-pay'){
+    var schedule=buildSchedule(loan);
+    var curRow=schedule.filter(function(r){return !r.isFuture;}).slice(-1)[0];
+    h='<div class="form-wrap">'
+      +'<button class="back-link" onclick="showDetail('+id+')">&#8592; Back</button>'
+      +'<div class="form-title">Add Payment &mdash; '+loan.lender+'</div>'
+      +'<div class="info-box">'
+      +'Current balance: <strong>'+fc(currentBal(loan))+'</strong><br>'
+      +(curRow?'Monthly interest (fixed): <strong style="color:#c00">'+fc(curRow.interest)+'</strong>':'')
+      +'</div>'
+      +'<div class="fg"><label class="fl">Payment Date</label><input class="fi" id="p-date" type="date" value="'+todayD()+'"></div>'
+      +'<div class="fg"><label class="fl">Amount Paid ($)</label><input class="fi" id="p-amt" type="number" placeholder="100000" inputmode="numeric" oninput="previewPay('+id+')" onchange="previewPay('+id+')"></div>'
+      +'<div class="prev-box" id="p-prev">'
+      +'<div class="pd">'
+      +'<div class="pdt">Interest at payment time: <span id="p-prev-i" style="color:#c00;font-weight:700"></span></div>'
+      +'<div class="pdt">Balance after payment: <span id="p-prev-b" style="font-weight:700"></span></div>'
+      +'</div></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="showDetail('+id+')">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitAddPay('+id+')">&#10003; Save Payment</button>'
+      +'</div></div>';
+  }
+  else if(type==='edit-loan'){
+    h='<div class="form-wrap">'
+      +'<button class="back-link" onclick="showDetail('+id+')">&#8592; Back</button>'
+      +'<div class="form-title">&#9998; Edit Loan</div>'
+      +'<div class="fg"><label class="fl">Lender Name</label><input class="fi" id="e-lender" type="text" value="'+loan.lender+'"></div>'
+      +'<div class="fr">'
+      +'<div class="fg"><label class="fl">Principal ($)</label><input class="fi" id="e-amt" type="number" value="'+loan.amt+'" inputmode="numeric"></div>'
+      +'<div class="fg"><label class="fl">Monthly Interest %</label><input class="fi" id="e-rate" type="number" step="0.1" value="'+loan.rate+'" inputmode="decimal"></div>'
+      +'</div>'
+      +'<div class="fg"><label class="fl">Start Date</label><input class="fi" id="e-start" type="date" value="'+loan.start+'"></div>'
+      +'<div class="fg"><label class="fl">Status</label><select class="fi" id="e-status">'
+      +'<option value="active"'+(loan.status==='active'?' selected':'')+'>Active</option>'
+      +'<option value="closed"'+(loan.status==='closed'?' selected':'')+'>Closed</option>'
+      +'</select></div>'
+      +'<div class="fg"><label class="fl">Notes</label><input class="fi" id="e-notes" type="text" value="'+(loan.notes||'')+'"></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn" onclick="showDetail('+id+')">Cancel</button>'
+      +'<button class="btn btn-p" onclick="submitEditLoan('+id+')">&#10003; Save</button>'
+      +'</div></div>';
+  }
+
+  g('page-form').innerHTML=h;
+  hidePagesExcept('page-form');
+}
+
+function previewPay(lid){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var a=parseFloat(g('p-amt').value),date=g('p-date').value,box=g('p-prev');
+  if(!a||!date){box.style.display='none';return;}
+  var tmpPay={id:999999,date:date,paid:a};
+  var bb=balBeforePayment(loan,tmpPay);
+  var ir=loan.amt*(loan.rate/100);
+  g('p-prev-i').textContent=fc(ir);
+  g('p-prev-b').textContent=fc(currentBal(loan)-a);
+  box.style.display='block';
+}
+
+function submitAddLoan(){
+  var lender=v('f-lender'),amt=nv('f-amt'),rate=nv('f-rate'),start=g('f-start').value;
+  if(!lender||!amt||!rate||!start){alert('Please fill in: name, amount, interest and start date');return;}
+  newLoan(lender,amt,rate,start,'active',[]);
+  setTab(1,document.querySelectorAll('.tab')[1]);
+}
+
+function submitAddPay(lid){
+  var loan=D.loans.find(function(l){return l.id===lid;});
+  var a=nv('p-amt'),date=g('p-date').value;
+  if(!a||!date){alert('Please fill in date and amount');return;}
+  loan.payments.push({id:D.pid++,date:date,paid:a});
+  save();showDetail(lid);
+}
+
+function submitEditLoan(id){
+  var l=D.loans.find(function(x){return x.id===id;});
+  var lender=v('e-lender'),amt=nv('e-amt'),rate=nv('e-rate'),start=g('e-start').value;
+  if(!lender||!amt||!rate||!start){alert('Please fill in all fields');return;}
+  l.lender=lender;l.amt=amt;l.rate=rate;l.start=start;
+  l.status=g('e-status').value;l.notes=v('e-notes');
+  save();showDetail(id);
+}
+
+load();
+renderOverview();
+</script>
+</body>
+</html>
